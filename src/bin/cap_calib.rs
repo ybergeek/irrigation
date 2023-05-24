@@ -1,20 +1,21 @@
-use irrigation::read_sensors;
-use irrigation::voltage;
-use std::thread;
-use std::time::Duration;
+//use std::env;
 
-
+use std::io;
 fn main() {
-    loop{
-        for (channel, value) in read_sensors().iter().enumerate() {
-            let int_value = i16::clone(value);
-            let voltage = voltage(int_value);
-            println!("Channel {}: value: {} voltage: {}", channel, value, voltage);
-            
-        }
-        // get I2C device back
+    let reader = io::stdin();
+    let mut buffer: String = String::new();
 
-        thread::sleep(Duration::from_millis(500));
+    println!("Is Capacitive Sensor Dry? (enter 'y' to proceed): ");
+    reader.read_line(&mut buffer)
+        .ok()
+        .expect("ERRMSG");
+    if buffer == "y"{
+        println!("input was y {buffer}");
+    }else {
+        println!("input was not y
+         {buffer}");
     }
-      
 }
+
+
+    

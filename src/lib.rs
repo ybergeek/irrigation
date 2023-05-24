@@ -4,6 +4,8 @@ use embedded_hal::adc::OneShot;
 use linux_embedded_hal::I2cdev;
 use nb::block;
 use ads1x1x::{channel, Ads1x1x, DataRate16Bit, FullScaleRange, SlaveAddr};
+use ads1x1x::ic::{Ads1115, Resolution16Bit};
+use ads1x1x::interface::I2cInterface;
 //use ads1x1x::ic::{Ads1115, Resolution16Bit};
 //use ads1x1x::interface::I2cInterface;
 
@@ -30,74 +32,36 @@ pub fn establish_pin3()-> OutputPin{
 pub fn establish_pin4()-> OutputPin{
     Gpio::new().unwrap().get(CH_4).unwrap().into_output()
 }
+type Adc = Ads1x1x<I2cInterface<I2cdev>, Ads1115, Resolution16Bit, ads1x1x::mode::OneShot>;
 
-pub fn read_sensor0() -> i16 {
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let address = SlaveAddr::default();
-    let mut adc = Ads1x1x::new_ads1115(dev, address);
-    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
-    adc.set_full_scale_range(FullScaleRange::Within4_096V)
-        .unwrap();
-    let value=block!(adc.read(&mut channel::SingleA0)).unwrap();
-    let _dev = adc.destroy_ads1115();
-    value
-
-}
-pub fn read_sensor1() -> i16 {
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let address = SlaveAddr::default();
-    let mut adc = Ads1x1x::new_ads1115(dev, address);
-    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
-    adc.set_full_scale_range(FullScaleRange::Within4_096V)
-        .unwrap();
-    let value=block!(adc.read(&mut channel::SingleA1)).unwrap();
-    let _dev = adc.destroy_ads1115();
-    value
+pub fn read_sensor0(adc: &mut Adc) -> i16  {
+    block!(adc.read(&mut channel::SingleA0)).unwrap()
 
 }
 
-pub fn read_sensor2() -> i16 {
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let address = SlaveAddr::default();
-    let mut adc = Ads1x1x::new_ads1115(dev, address);
-    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
-    adc.set_full_scale_range(FullScaleRange::Within4_096V)
-        .unwrap();
-    let value=block!(adc.read(&mut channel::SingleA2)).unwrap();
-    let _dev = adc.destroy_ads1115();
-    value
+pub fn read_sensor1(adc: &mut Adc) -> i16  {
+    block!(adc.read(&mut channel::SingleA1)).unwrap()
 
 }
 
-pub fn read_sensor3() -> i16 {
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let address = SlaveAddr::default();
-    let mut adc = Ads1x1x::new_ads1115(dev, address);
-    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
-    adc.set_full_scale_range(FullScaleRange::Within4_096V)
-        .unwrap();
-    let value=block!(adc.read(&mut channel::SingleA3)).unwrap();
-    let _dev = adc.destroy_ads1115();
-    value
+pub fn read_sensor2(adc: &mut Adc) -> i16 {
+    block!(adc.read(&mut channel::SingleA2)).unwrap()
 
 }
 
-pub fn read_sensors() -> [i16;4]{
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let address = SlaveAddr::default();
-    let mut adc = Ads1x1x::new_ads1115(dev, address);
-    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
-    adc.set_full_scale_range(FullScaleRange::Within4_096V)
-        .unwrap();
+pub fn read_sensor3(adc: &mut Adc) -> i16 {
+    block!(adc.read(&mut channel::SingleA3)).unwrap()
 
-    let values =[
+}
+
+pub fn read_sensors(adc: &mut Adc) -> [i16;4]{
+ 
+   [
         block!(adc.read(&mut channel::SingleA0)).unwrap_or(8091),
         block!(adc.read(&mut channel::SingleA1)).unwrap_or(8091),
         block!(adc.read(&mut channel::SingleA2)).unwrap_or(8091),
         block!(adc.read(&mut channel::SingleA3)).unwrap_or(8091),
-    ];
-    let _dev_ = adc.destroy_ads1115();
-    values
+    ]
 }
 
 
