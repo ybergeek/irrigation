@@ -7,7 +7,8 @@ cross build --target $TARGET
 
 # upload binary
 #scp  ./target/$TARGET/debug/simple_relay $HOST:/home/alf/bin/
-scp  ./target/$TARGET/debug/simple_sensor $HOST:/home/alf/bin/
+#scp  ./target/$TARGET/debug/simple_sensor $HOST:/home/alf/bin/
+scp  ./target/$TARGET/debug/cap_calib $HOST:/home/alf/bin/
 
 # execute binary
  #ssh $HOST './test_rppal'

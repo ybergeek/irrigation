@@ -2,8 +2,8 @@ use irrigation::establish_pin1;
 use std::error::Error;
 use std::thread;
 use std::time::Duration;
-use tokio::signal;
-
+//use tokio::signal;
+/* 
 async fn shutdown_signal() { // (1)
     let ctrl_c = async {
         signal::ctrl_c()
@@ -24,7 +24,7 @@ async fn shutdown_signal() { // (1)
         _ = terminate => {},
     }
     establish_pin1().set_high();
-}
+} */
 
 fn main()-> Result<(), Box<dyn Error>>{
     let mut pin1 = establish_pin1();

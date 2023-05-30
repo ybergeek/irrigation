@@ -3,11 +3,10 @@ use rppal::gpio::OutputPin;
 use embedded_hal::adc::OneShot;
 use linux_embedded_hal::I2cdev;
 use nb::block;
-use ads1x1x::{channel, Ads1x1x, DataRate16Bit, FullScaleRange, SlaveAddr};
+use ads1x1x::{channel, Ads1x1x};
 use ads1x1x::ic::{Ads1115, Resolution16Bit};
 use ads1x1x::interface::I2cInterface;
-//use ads1x1x::ic::{Ads1115, Resolution16Bit};
-//use ads1x1x::interface::I2cInterface;
+
 
 
 // Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
@@ -52,6 +51,16 @@ pub fn read_sensor2(adc: &mut Adc) -> i16 {
 pub fn read_sensor3(adc: &mut Adc) -> i16 {
     block!(adc.read(&mut channel::SingleA3)).unwrap()
 
+}
+
+pub fn read_sensor(num: usize, adc: &mut Adc) -> i16 {
+    match num{
+        0 => return block!(adc.read(&mut channel::SingleA0)).unwrap(),
+        1 => return block!(adc.read(&mut channel::SingleA1)).unwrap(),
+        2 => return block!(adc.read(&mut channel::SingleA2)).unwrap(),
+        3 => return block!(adc.read(&mut channel::SingleA2)).unwrap(),
+        _ => return 0,
+    }
 }
 
 pub fn read_sensors(adc: &mut Adc) -> [i16;4]{
