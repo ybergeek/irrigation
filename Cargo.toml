@@ -11,4 +11,5 @@ ads1x1x = "0.2"
 linux-embedded-hal="0.3"
 embedded-hal="0.2.7"
 nb="1.1"
+serde_json="1.0"
 tokio = { version = "1.0", features = ["full"] }

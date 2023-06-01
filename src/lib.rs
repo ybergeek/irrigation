@@ -3,9 +3,10 @@ use rppal::gpio::OutputPin;
 use embedded_hal::adc::OneShot;
 use linux_embedded_hal::I2cdev;
 use nb::block;
-use ads1x1x::{channel, Ads1x1x};
+use ads1x1x::{channel, Ads1x1x,DataRate16Bit, FullScaleRange, SlaveAddr};
 use ads1x1x::ic::{Ads1115, Resolution16Bit};
 use ads1x1x::interface::I2cInterface;
+
 
 
 
@@ -31,26 +32,21 @@ pub fn establish_pin3()-> OutputPin{
 pub fn establish_pin4()-> OutputPin{
     Gpio::new().unwrap().get(CH_4).unwrap().into_output()
 }
-type Adc = Ads1x1x<I2cInterface<I2cdev>, Ads1115, Resolution16Bit, ads1x1x::mode::OneShot>;
+pub type Adc = Ads1x1x<I2cInterface<I2cdev>, Ads1115, Resolution16Bit, ads1x1x::mode::OneShot>;
 
-pub fn read_sensor0(adc: &mut Adc) -> i16  {
-    block!(adc.read(&mut channel::SingleA0)).unwrap()
-
-}
-
-pub fn read_sensor1(adc: &mut Adc) -> i16  {
-    block!(adc.read(&mut channel::SingleA1)).unwrap()
-
-}
-
-pub fn read_sensor2(adc: &mut Adc) -> i16 {
-    block!(adc.read(&mut channel::SingleA2)).unwrap()
-
-}
-
-pub fn read_sensor3(adc: &mut Adc) -> i16 {
-    block!(adc.read(&mut channel::SingleA3)).unwrap()
-
+pub fn establish_sensor() -> Ads1x1x<ads1x1x::interface::I2cInterface<I2cdev>, ads1x1x::ic::Ads1115, ads1x1x::ic::Resolution16Bit, ads1x1x::mode::OneShot> {
+    let dev: I2cdev = I2cdev::new("/dev/i2c-1").unwrap();
+    let address: SlaveAddr = SlaveAddr::default();
+    let mut adc: Ads1x1x<
+        ads1x1x::interface::I2cInterface<I2cdev>,
+        ads1x1x::ic::Ads1115,
+        ads1x1x::ic::Resolution16Bit,
+        ads1x1x::mode::OneShot,
+    > = Ads1x1x::new_ads1115(dev, address);
+    adc.set_data_rate(DataRate16Bit::Sps860).unwrap();
+    adc.set_full_scale_range(FullScaleRange::Within4_096V)
+        .unwrap();
+    adc
 }
 
 pub fn read_sensor(num: usize, adc: &mut Adc) -> i16 {
