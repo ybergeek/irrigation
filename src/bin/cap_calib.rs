@@ -1,10 +1,9 @@
 //use std::env;
-use irrigation::{read_sensor,  voltage,establish_sensor, Adc};
+use irrigation::{read_sensor,  voltage,establish_sensor, Adc,write};
 use std::thread;
 use std::time::Duration;
-use std::io::{BufWriter, Write};
 use std::io;
-use std::fs::File;
+
 
 
 fn main() ->std::io::Result<()>{
@@ -13,10 +12,10 @@ fn main() ->std::io::Result<()>{
 
     let mut adc = establish_sensor();
     
-    let max_val = read_sensors( "max",&mut adc);
+    let max_val: [i16; 4] = read_sensors( "max",&mut adc);
 
-    let min_val = read_sensors( "min",&mut adc);
-    let _dev =adc.destroy_ads1115();
+    let min_val: [i16; 4] = read_sensors( "min",&mut adc);
+    let _dev: linux_embedded_hal::I2cdev =adc.destroy_ads1115();
     
     for i in 0..4{
         println!("min value for channel {i} : {}" ,min_val[i]);
@@ -25,20 +24,12 @@ fn main() ->std::io::Result<()>{
     }
     write(min_val,max_val)?;
     Ok(())
-
-    
+ 
 }
 
-fn write(min: [i16;4],max: [i16;4])->std::io::Result<()>{
 
-    let vec = min.to_vec();
-    
-    let file = File::create("cap_config.json")?;
-    let mut writer = BufWriter::new(file);
-    serde_json::to_writer(&mut writer, &vec)?;
-    writer.flush()?;
-    Ok(())
-}
+
+
 
 fn read_sensors( max_min: &str, adc: &mut Adc)-> [i16; 4] {
     let reader = io::stdin();

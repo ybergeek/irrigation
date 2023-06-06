@@ -6,15 +6,63 @@ use nb::block;
 use ads1x1x::{channel, Ads1x1x,DataRate16Bit, FullScaleRange, SlaveAddr};
 use ads1x1x::ic::{Ads1115, Resolution16Bit};
 use ads1x1x::interface::I2cInterface;
-
-
-
+use serde::{Deserialize, Serialize};
+use std::io::{BufWriter, Write};
+use std::fs::File;
 
 // Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
 const CH_1: u8 = 19;
 const CH_3: u8 = 20;
 const CH_4: u8 = 21;
 const CH_2: u8 = 26;
+
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Calibration{
+ full_saturation: FullSaturation,
+ zero_saturation: ZeroSaturation,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FullSaturation{
+    channel_zero: i16,
+    channel_one: i16,
+    channel_two: i16,
+    channel_three: i16,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ZeroSaturation{
+    channel_zero: i16,
+    channel_one: i16,
+    channel_two: i16,
+    channel_three: i16,
+}
+
+
+pub fn write(min: [i16;4],max: [i16;4])->std::io::Result<()>{
+    let full_saturation: FullSaturation = FullSaturation{
+        channel_zero: min[0],
+        channel_one: min[1],
+        channel_two: min[2],
+        channel_three: min[3],
+    };
+    
+    let zero_saturation: ZeroSaturation = ZeroSaturation{
+        channel_zero: max[0],
+        channel_one: max[1],
+        channel_two: max[2],
+        channel_three: max[3],
+    };
+
+    let  calibration: Calibration = Calibration{full_saturation,zero_saturation};
+
+    let file: File = File::create("cap_config.json")?;
+    let mut writer: BufWriter<File> = BufWriter::new(file);
+    serde_json::to_writer(&mut writer, &calibration)?;
+    writer.flush()?;
+    Ok(())
+}
 
 
 pub fn establish_pin1()->  OutputPin{

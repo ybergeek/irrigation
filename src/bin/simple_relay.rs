@@ -1,4 +1,4 @@
-use irrigation::establish_pin1;
+use irrigation::{establish_pin1,establish_pin2,establish_pin3,establish_pin4};
 use std::error::Error;
 use std::thread;
 use std::time::Duration;
@@ -28,10 +28,23 @@ async fn shutdown_signal() { // (1)
 
 fn main()-> Result<(), Box<dyn Error>>{
     let mut pin1 = establish_pin1();
+    let mut pin2 = establish_pin2();
+    let mut pin3 = establish_pin3();
+    let mut pin4 = establish_pin4();
+   
     loop{
         pin1.set_low();
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(500));
         pin1.set_high();
+        pin2.set_low();
+        thread::sleep(Duration::from_millis(500));
+        pin2.set_high();
+        pin3.set_low();
+        thread::sleep(Duration::from_millis(500));
+        pin3.set_high();
+        pin4.set_low();
+        thread::sleep(Duration::from_millis(500));
+        pin4.set_high();
         
     }
     
