@@ -10,7 +10,8 @@ cross build --release --target $TARGET
 #scp  ./target/$TARGET/debug/simple_relay $HOST:/home/alf/bin/
 #scp  ./target/$TARGET/debug/simple_sensor $HOST:/home/alf/bin/
 #scp  ./target/$TARGET/debug/cap_calib $HOST:/home/alf/bin/
-scp  ./target/$TARGET/release/cap_calib $HOST:/home/alf/bin/
+#scp  ./target/$TARGET/release/cap_calib $HOST:/home/alf/bin/
+scp  ./target/$TARGET/release/soil_saturation $HOST:/home/alf/bin/
 
 # execute binary
  #ssh $HOST './test_rppal'

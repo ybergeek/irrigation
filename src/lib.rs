@@ -9,6 +9,10 @@ use ads1x1x::interface::I2cInterface;
 use serde::{Deserialize, Serialize};
 use std::io::{BufWriter, Write};
 use std::fs::File;
+use std::io::BufReader;
+use std::error::Error;
+use std::path::Path;
+use round::round;
 
 // Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
 const CH_1: u8 = 19;
@@ -18,13 +22,13 @@ const CH_2: u8 = 26;
 
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Calibration{
+pub struct Calibration{
  full_saturation: FullSaturation,
  zero_saturation: ZeroSaturation,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct FullSaturation{
+pub struct FullSaturation{
     channel_zero: i16,
     channel_one: i16,
     channel_two: i16,
@@ -32,7 +36,7 @@ struct FullSaturation{
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct ZeroSaturation{
+pub struct ZeroSaturation{
     channel_zero: i16,
     channel_one: i16,
     channel_two: i16,
@@ -57,13 +61,36 @@ pub fn write(min: [i16;4],max: [i16;4])->std::io::Result<()>{
 
     let  calibration: Calibration = Calibration{full_saturation,zero_saturation};
 
-    let file: File = File::create("cap_config.json")?;
+    let file: File = File::create("../config/cap_config.json")?;
     let mut writer: BufWriter<File> = BufWriter::new(file);
     serde_json::to_writer(&mut writer, &calibration)?;
     writer.flush()?;
     Ok(())
 }
 
+pub fn reader<P: AsRef<Path>>(path: P) -> Result<Calibration, Box<dyn Error>> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+
+    // Read the JSON contents of the file as an instance of `User`.
+    let calibration = serde_json::from_reader(reader)?;
+
+    // Return the `calibration`.
+    Ok(calibration)
+}
+
+
+pub fn percent_translation(calibration: Calibration, raw: i16, index: usize)-> f64 {
+    
+    match index{
+        0 => return round(f64::from(raw - calibration.zero_saturation.channel_zero/calibration.full_saturation.channel_zero - calibration.zero_saturation.channel_zero*100).abs(),3),
+        1 => return round(f64::from(raw - calibration.zero_saturation.channel_one/calibration.full_saturation.channel_one - calibration.zero_saturation.channel_one*100).abs(),3),
+        2 => return round(f64::from(raw - calibration.zero_saturation.channel_two/calibration.full_saturation.channel_two - calibration.zero_saturation.channel_two*100).abs(),3),
+        3 => return round(f64::from(raw - calibration.zero_saturation.channel_three/calibration.full_saturation.channel_three - calibration.zero_saturation.channel_three*100).abs(),3),
+        _ => return 0.0,
+    }
+
+}
 
 pub fn establish_pin1()->  OutputPin{
     Gpio::new().unwrap().get(CH_1).unwrap().into_output()
